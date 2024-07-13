@@ -5,7 +5,7 @@
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC #### Step 1 - Read the csv file using the spark dataframe reader
+# MAGIC #### Step 1 - Read the json file using the spark dataframe reader
 
 # COMMAND ----------
 
@@ -16,7 +16,7 @@ origen_blob = "raw"
 # Destiny
 destiny_blob = "processed"
 # File
-file_name = "drivers"
+file_name = "results"
 file_type = "json"
 
 # COMMAND ----------
@@ -47,42 +47,45 @@ drivers_schema = StructType(fields=[
 # Read data
 drivers_df = spark.read.json(
     f"/mnt/{storage_account_name}/{origen_blob}/{file_name}.{file_type}",
-    #inferSchema = True     #Enable inferSchema
     schema = drivers_schema
     )
-display(drivers_df)
 
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC #### Step 2 - Drop unwanted columns from the dataframe
+# MAGIC #### Step 2 - Rename and add columns
 
 # COMMAND ----------
 
-drivers_dropped_df = drivers_df.drop(drivers_df.url)
+from pyspark.sql.functions import current_timestamp, lit, concat
 
 # COMMAND ----------
 
-# MAGIC %md
-# MAGIC #### Step 3 - Rename columns and Add ingestion date
-
-# COMMAND ----------
-
-from pyspark.sql.functions import current_timestamp, to_timestamp, lit, concat
-
-# COMMAND ----------
-
-constructors_final_df = constructors_dropped_df \
-    .withColumnRenamed("constructorId", "constructor_id") \
-    .withColumnRenamed("constructorRef", "constructor_ref") \
-    .withColumn("ingestion_date", current_timestamp())
-
+drivers_with_collumns_df = drivers_df \
+    .withColumnRenamed("driverId", "driver_id") \
+    .withColumnRenamed("driverRef", "driver_ref") \
+    .withColumn("ingestion_date", current_timestamp()) \
+    .withColumn("name",
+                concat(
+                    "name.forename",
+                    lit(" "),
+                    "name.surname",
+                ))
 
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC #### Step 5 - Write data to datalake as parquet
+# MAGIC #### Step 3 - Drop unwanted columns from the dataframe
 
 # COMMAND ----------
 
-constructors_final_df.write.parquet(f"/mnt/{storage_account_name}/{destiny_blob}/{file_name}", mode="overwrite")
+drivers_final_df = drivers_with_collumns_df.drop(drivers_with_collumns_df.url)
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC #### Step 4 - Write data to datalake as parquet
+
+# COMMAND ----------
+
+drivers_final_df.write.parquet(f"/mnt/{storage_account_name}/{destiny_blob}/{file_name}", mode="overwrite")

@@ -5,7 +5,7 @@
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC #### Step 1 - Read the csv file using the spark dataframe reader
+# MAGIC #### Step 1 - Read the json file using the spark dataframe reader
 
 # COMMAND ----------
 
@@ -29,7 +29,6 @@ constructors_schema = "constructorId INT, constructorRef STRING, name STRING, na
 # Read data
 constructors_df = spark.read.json(
     f"/mnt/{storage_account_name}/{origen_blob}/{file_name}.{file_type}",
-    #inferSchema = True     #Enable inferSchema
     schema = constructors_schema
     )
 
