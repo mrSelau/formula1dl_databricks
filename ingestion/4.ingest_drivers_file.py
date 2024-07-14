@@ -4,17 +4,24 @@
 
 # COMMAND ----------
 
+dbutils.widgets.text("p_data_source", "")
+v_data_source = dbutils.widgets.get("p_data_source")
+
+# COMMAND ----------
+
+# MAGIC %run "../includes/configuration"
+
+# COMMAND ----------
+
+# MAGIC %run "../includes/commom_functions"
+
+# COMMAND ----------
+
 # MAGIC %md
 # MAGIC #### Step 1 - Read the json file using the spark dataframe reader
 
 # COMMAND ----------
 
-# Storage description
-storage_account_name = "formula1dlld"
-# Origen
-origen_blob = "raw"
-# Destiny
-destiny_blob = "processed"
 # File
 file_name = "results"
 file_type = "json"
@@ -46,7 +53,7 @@ drivers_schema = StructType(fields=[
 
 # Read data
 drivers_df = spark.read.json(
-    f"/mnt/{storage_account_name}/{origen_blob}/{file_name}.{file_type}",
+    f"{raw_folder_path}/{file_name}.{file_type}",
     schema = drivers_schema
     )
 
@@ -64,7 +71,7 @@ from pyspark.sql.functions import current_timestamp, lit, concat
 drivers_with_collumns_df = drivers_df \
     .withColumnRenamed("driverId", "driver_id") \
     .withColumnRenamed("driverRef", "driver_ref") \
-    .withColumn("ingestion_date", current_timestamp()) \
+    .withColumn("data_source", lit(v_data_source)) \
     .withColumn("name",
                 concat(
                     "name.forename",
@@ -74,12 +81,16 @@ drivers_with_collumns_df = drivers_df \
 
 # COMMAND ----------
 
+constructors_with_timestamp_df = add_ingestion_date(drivers_with_collumns_df)
+
+# COMMAND ----------
+
 # MAGIC %md
 # MAGIC #### Step 3 - Drop unwanted columns from the dataframe
 
 # COMMAND ----------
 
-drivers_final_df = drivers_with_collumns_df.drop(drivers_with_collumns_df.url)
+drivers_final_df = constructors_with_timestamp_df.drop(constructors_with_timestamp_df.url)
 
 # COMMAND ----------
 
@@ -88,4 +99,8 @@ drivers_final_df = drivers_with_collumns_df.drop(drivers_with_collumns_df.url)
 
 # COMMAND ----------
 
-drivers_final_df.write.parquet(f"/mnt/{storage_account_name}/{destiny_blob}/{file_name}", mode="overwrite")
+drivers_final_df.write.parquet(f"{processed_folder_path}/{file_name}", mode="overwrite")
+
+# COMMAND ----------
+
+dbutils.notebook.exit("success")

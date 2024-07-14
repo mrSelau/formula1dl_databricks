@@ -4,17 +4,24 @@
 
 # COMMAND ----------
 
+dbutils.widgets.text("p_data_source", "")
+v_data_source = dbutils.widgets.get("p_data_source")
+
+# COMMAND ----------
+
+# MAGIC %run "../includes/configuration"
+
+# COMMAND ----------
+
+# MAGIC %run "../includes/commom_functions"
+
+# COMMAND ----------
+
 # MAGIC %md
 # MAGIC #### Step 1 - Read the json file using the spark dataframe reader
 
 # COMMAND ----------
 
-# Storage description
-storage_account_name = "formula1dlld"
-# Origen
-origen_blob = "raw"
-# Destiny
-destiny_blob = "processed"
 # File
 file_name = "results"
 file_type = "json"
@@ -51,7 +58,7 @@ results_schema = StructType(fields=[
 
 # Read data
 results_df = spark.read.json(
-    f"/mnt/{storage_account_name}/{origen_blob}/{file_name}.{file_type}",
+    f"{raw_folder_path}/{file_name}.{file_type}",
     schema = results_schema
     )
 
@@ -62,7 +69,7 @@ results_df = spark.read.json(
 
 # COMMAND ----------
 
-from pyspark.sql.functions import current_timestamp
+from pyspark.sql.functions import current_timestamp, lit
 
 # COMMAND ----------
 
@@ -77,7 +84,11 @@ results_with_collumns_df = results_df \
     .withColumnRenamed("fastestLap", "fastest_lap") \
     .withColumnRenamed("fastestLapSpeed", "fastest_lap_speed") \
     .withColumnRenamed("fastestLapTime", "fastest_lap_time") \
-    .withColumn("ingestion_date", current_timestamp())
+    .withColumn("data_source", lit(v_data_source))
+
+# COMMAND ----------
+
+results_with_timestamp_df = add_ingestion_date(results_with_collumns_df)
 
 # COMMAND ----------
 
@@ -86,7 +97,7 @@ results_with_collumns_df = results_df \
 
 # COMMAND ----------
 
-results_final_df = results_with_collumns_df.drop(results_with_collumns_df.status_id)
+results_final_df = results_with_timestamp_df.drop(results_with_timestamp_df.status_id)
 
 # COMMAND ----------
 
@@ -95,4 +106,8 @@ results_final_df = results_with_collumns_df.drop(results_with_collumns_df.status
 
 # COMMAND ----------
 
-results_final_df.write.parquet(f"/mnt/{storage_account_name}/{destiny_blob}/{file_name}", mode="overwrite", partitionBy="race_id")
+results_final_df.write.parquet(f"{processed_folder_path}/{file_name}", mode="overwrite", partitionBy="race_id")
+
+# COMMAND ----------
+
+dbutils.notebook.exit("success")

@@ -4,17 +4,24 @@
 
 # COMMAND ----------
 
+dbutils.widgets.text("p_data_source", "")
+v_data_source = dbutils.widgets.get("p_data_source")
+
+# COMMAND ----------
+
+# MAGIC %run "../includes/configuration"
+
+# COMMAND ----------
+
+# MAGIC %run "../includes/commom_functions"
+
+# COMMAND ----------
+
 # MAGIC %md
 # MAGIC #### Step 1 - Read the csv file using the spark dataframe reader
 
 # COMMAND ----------
 
-# Storage description
-storage_account_name = "formula1dlld"
-# Origen
-origen_blob = "raw"
-# Destiny
-destiny_blob = "processed"
 # File
 file_name = "races"
 file_type = "csv"
@@ -42,7 +49,7 @@ races_schema = StructType(fields=[
 
 # Read data
 races_df = spark.read.csv(
-    f"/mnt/{storage_account_name}/{origen_blob}/{file_name}.{file_type}",
+    f"{raw_folder_path}/{file_name}.{file_type}",
     header = True,           #Enable line 1 as header,
     #inferSchema = True     #Enable inferSchema
     schema = races_schema
@@ -60,8 +67,8 @@ from pyspark.sql.functions import current_timestamp, to_timestamp, lit, concat
 
 # COMMAND ----------
 
-races_with_timestamp_df = races_df \
-    .withColumn("ingestion_date", current_timestamp()) \
+races_with_race_timestamp_df = races_df \
+    .withColumn("data_source", lit(v_data_source)) \
     .withColumn(
         'race_timestamp', 
         to_timestamp(
@@ -73,6 +80,10 @@ races_with_timestamp_df = races_df \
             "yyyy-MM-dd HH:mm:ss"
         )
     )
+
+# COMMAND ----------
+
+races_with_timestamp_df = add_ingestion_date(races_with_race_timestamp_df)
 
 # COMMAND ----------
 
@@ -98,4 +109,8 @@ races_selected_df = races_with_timestamp_df.select(
 
 # COMMAND ----------
 
-races_selected_df.write.parquet(f"/mnt/{storage_account_name}/{destiny_blob}/{file_name}", mode="overwrite")
+races_selected_df.write.parquet(f"{processed_folder_path}/{file_name}", mode="overwrite")
+
+# COMMAND ----------
+
+dbutils.notebook.exit("success")
