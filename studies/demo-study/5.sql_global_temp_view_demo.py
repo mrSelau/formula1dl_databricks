@@ -1,7 +1,7 @@
 # Databricks notebook source
 # MAGIC %md
 # MAGIC ## Access dataframes using sql
-# MAGIC It's possible access a temporary view on other notebook
+# MAGIC It's possible access a global temporary view on other notebook
 # MAGIC
 # MAGIC #### Objectives
 # MAGIC 1. Create global temporary views on dataframe
