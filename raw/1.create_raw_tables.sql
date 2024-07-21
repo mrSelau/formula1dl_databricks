@@ -151,3 +151,48 @@ OPTIONS (path "/mnt/formula1dlld/raw/pit_stops.json", header true, multiLine tru
 -- COMMAND ----------
 
 -- MAGIC %md
+-- MAGIC #### Create lap times table
+
+-- COMMAND ----------
+
+DROP TABLE IF EXISTS f1_raw.lap_times;
+CREATE TABLE IF NOT EXISTS f1_raw.lap_times(
+    raceId INT,
+    driverId INT,
+    lap INT,
+    position INT,
+    time  STRING,
+    milliseconds INT
+)
+USING csv
+OPTIONS (path "/mnt/formula1dlld/raw/lap_times", header true)
+
+-- COMMAND ----------
+
+-- MAGIC %md
+-- MAGIC #### Create qualifying table
+
+-- COMMAND ----------
+
+DROP TABLE IF EXISTS f1_raw.qualifying;
+CREATE TABLE IF NOT EXISTS f1_raw.qualifying(
+    qualifyId INT,
+    raceId INT,
+    driverId INT,
+    constructorId INT,
+    number INT,
+    position INT,
+    q1  STRING,
+    q2  STRING,
+    q3  STRING
+)
+USING json
+OPTIONS (path "/mnt/formula1dlld/raw/qualifying", header true, multiLine true)
+
+-- COMMAND ----------
+
+DESC EXTENDED f1_raw.qualifying
+
+-- COMMAND ----------
+
+-- MAGIC %md

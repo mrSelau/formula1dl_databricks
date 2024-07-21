@@ -69,7 +69,7 @@ lap_times_renamed_df = lap_times_df \
 
 # COMMAND ----------
 
-lap_times_final_df = add_ingestion_date(lap_times_renamed_df)
+pit_stops_final_df = add_ingestion_date(lap_times_renamed_df)
 
 # COMMAND ----------
 
@@ -78,7 +78,8 @@ lap_times_final_df = add_ingestion_date(lap_times_renamed_df)
 
 # COMMAND ----------
 
-lap_times_final_df.write.parquet(f"{processed_folder_path}/{file_name}", mode="overwrite")
+#lap_times_final_df.write.parquet(f"{processed_folder_path}/{file_name}", mode="overwrite")
+pit_stops_final_df.write.mode("overwrite").format("delta").saveAsTable(f"f1_processed.{file_name}")
 
 # COMMAND ----------
 

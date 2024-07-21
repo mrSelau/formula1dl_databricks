@@ -23,7 +23,7 @@ v_data_source = dbutils.widgets.get("p_data_source")
 # COMMAND ----------
 
 # File
-file_name = "results"
+file_name = "drivers"
 file_type = "json"
 
 # COMMAND ----------
@@ -99,7 +99,8 @@ drivers_final_df = constructors_with_timestamp_df.drop(constructors_with_timesta
 
 # COMMAND ----------
 
-drivers_final_df.write.parquet(f"{processed_folder_path}/{file_name}", mode="overwrite")
+#drivers_final_df.write.parquet(f"{processed_folder_path}/{file_name}", mode="overwrite")
+drivers_final_df.write.mode("overwrite").format("delta").saveAsTable(f"f1_processed.{file_name}")
 
 # COMMAND ----------
 

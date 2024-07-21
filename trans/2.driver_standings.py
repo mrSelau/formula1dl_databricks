@@ -18,7 +18,7 @@
 
 # COMMAND ----------
 
-race_results_df = spark.read.parquet(f"{presentation_folder_path}/race_results")
+race_results_df = spark.read.format("delta").load(f"{presentation_folder_path}/race_results")
 
 # COMMAND ----------
 
@@ -63,4 +63,5 @@ final_df = driver_standings_df.withColumn("rank", rank().over(driver_rank_spec))
 
 # COMMAND ----------
 
-final_df.write.parquet(f"{presentation_folder_path}/driver_standings", mode="overwrite")
+#final_df.write.parquet(f"{presentation_folder_path}/driver_standings", mode="overwrite")
+final_df.write.mode("overwrite").format("delta").saveAsTable("f1_presentation.driver_standings")

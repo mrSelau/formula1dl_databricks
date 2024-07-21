@@ -108,7 +108,8 @@ circuits_final_df = add_ingestion_date(circuits_rename_df)
 
 # COMMAND ----------
 
-circuits_final_df.write.parquet(f"{processed_folder_path}/{file_name}", mode="overwrite")
+#circuits_final_df.write.parquet(f"{processed_folder_path}/{file_name}", mode="overwrite")
+circuits_final_df.write.mode("overwrite").format("delta").saveAsTable("f1_processed.circuits")
 
 # COMMAND ----------
 

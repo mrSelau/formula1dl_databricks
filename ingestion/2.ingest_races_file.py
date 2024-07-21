@@ -109,7 +109,8 @@ races_selected_df = races_with_timestamp_df.select(
 
 # COMMAND ----------
 
-races_selected_df.write.parquet(f"{processed_folder_path}/{file_name}", mode="overwrite")
+#races_selected_df.write.parquet(f"{processed_folder_path}/{file_name}", mode="overwrite")
+races_selected_df.write.mode("overwrite").format("delta").saveAsTable(f"f1_processed.{file_name}")
 
 # COMMAND ----------
 

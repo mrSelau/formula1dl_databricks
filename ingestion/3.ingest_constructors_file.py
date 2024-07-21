@@ -75,7 +75,8 @@ constructors_final_df = add_ingestion_date(constructors_renamed_df)
 
 # COMMAND ----------
 
-constructors_final_df.write.parquet(f"{processed_folder_path}/{file_name}", mode="overwrite")
+#constructors_final_df.write.parquet(f"{processed_folder_path}/{file_name}", mode="overwrite")
+constructors_final_df.write.mode("overwrite").format("delta").saveAsTable(f"f1_processed.{file_name}")
 
 # COMMAND ----------
 

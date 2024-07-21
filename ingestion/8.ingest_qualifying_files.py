@@ -84,7 +84,8 @@ qualifying_final_df = add_ingestion_date(qualifying_renamed_df)
 
 # COMMAND ----------
 
-qualifying_final_df.write.parquet(f"{processed_folder_path}/{file_name}", mode="overwrite")
+#qualifying_final_df.write.parquet(f"{processed_folder_path}/{file_name}", mode="overwrite")
+qualifying_final_df.write.mode("overwrite").format("delta").saveAsTable(f"f1_processed.{file_name}")
 
 # COMMAND ----------
 

@@ -106,7 +106,8 @@ results_final_df = results_with_timestamp_df.drop(results_with_timestamp_df.stat
 
 # COMMAND ----------
 
-results_final_df.write.parquet(f"{processed_folder_path}/{file_name}", mode="overwrite", partitionBy="race_id")
+#results_final_df.write.parquet(f"{processed_folder_path}/{file_name}", mode="overwrite", partitionBy="race_id")
+results_final_df.write.mode("overwrite").partitionBy('race_id').format("delta").saveAsTable(f"f1_processed.{file_name}")
 
 # COMMAND ----------
 
